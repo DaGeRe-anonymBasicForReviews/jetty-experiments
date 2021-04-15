@@ -1,28 +1,26 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.http;
 
 import java.nio.ByteBuffer;
-
 import org.eclipse.jetty.util.Index;
 import org.eclipse.jetty.util.StringUtil;
 
 /**
  * Known HTTP Methods
  */
-public enum HttpMethod
-{
+public enum HttpMethod {
+
     // From https://www.iana.org/assignments/http-methods/http-methods.xhtml
     ACL(Type.IDEMPOTENT),
     BASELINE_CONTROL(Type.IDEMPOTENT),
@@ -63,38 +61,35 @@ public enum HttpMethod
     UPDATE(Type.IDEMPOTENT),
     UPDATEREDIRECTREF(Type.IDEMPOTENT),
     VERSION_CONTROL(Type.IDEMPOTENT),
-
     // Other methods
     PROXY(Type.NORMAL);
 
     // The type of the method
-    private enum Type
-    {
-        NORMAL,
-        IDEMPOTENT,
-        SAFE
+    private enum Type {
+
+        NORMAL, IDEMPOTENT, SAFE
     }
 
     private final String _method;
+
     private final byte[] _bytes;
+
     private final ByteBuffer _buffer;
+
     private final Type _type;
 
-    HttpMethod(Type type)
-    {
+    HttpMethod(Type type) {
         _method = name().replace('_', '-');
         _type = type;
         _bytes = StringUtil.getBytes(_method);
         _buffer = ByteBuffer.wrap(_bytes);
     }
 
-    public byte[] getBytes()
-    {
+    public byte[] getBytes() {
         return _bytes;
     }
 
-    public boolean is(String s)
-    {
+    public boolean is(String s) {
         return toString().equalsIgnoreCase(s);
     }
 
@@ -105,8 +100,7 @@ public enum HttpMethod
      * All safe methods are also idempotent, but not all idempotent methods are safe
      * @return if the method is safe.
      */
-    public boolean isSafe()
-    {
+    public boolean isSafe() {
         return _type == Type.SAFE;
     }
 
@@ -115,43 +109,38 @@ public enum HttpMethod
      * It would not matter if the method is called only once, or ten times over. The result should be the same.
      * @return true if the method is idempotent.
      */
-    public boolean isIdempotent()
-    {
+    public boolean isIdempotent() {
         return _type.ordinal() >= Type.IDEMPOTENT.ordinal();
     }
 
-    public ByteBuffer asBuffer()
-    {
+    public ByteBuffer asBuffer() {
         return _buffer.asReadOnlyBuffer();
     }
 
-    public String asString()
-    {
+    public String asString() {
         return _method;
     }
 
-    public String toString()
-    {
+    public String toString() {
         return _method;
     }
 
-    public static final Index<HttpMethod> INSENSITIVE_CACHE = new Index.Builder<HttpMethod>()
-        .caseSensitive(false)
-        .withAll(HttpMethod.values(), HttpMethod::asString)
-        .build();
-    public static final Index<HttpMethod> CACHE = new Index.Builder<HttpMethod>()
-        .caseSensitive(true)
-        .withAll(HttpMethod.values(), HttpMethod::asString)
-        .build();
-    public static final Index<HttpMethod> LOOK_AHEAD = new Index.Builder<HttpMethod>()
-        .caseSensitive(true)
-        .withAll(HttpMethod.values(), httpMethod -> httpMethod.asString() + ' ')
-        .build();
+    public static final Index<HttpMethod> INSENSITIVE_CACHE = new Index.Builder<HttpMethod>().caseSensitive(false).withAll(HttpMethod.values(), HttpMethod::asString).build();
+
+    public static final Index<HttpMethod> CACHE = new Index.Builder<HttpMethod>().caseSensitive(true).withAll(HttpMethod.values(), HttpMethod::asString).build();
+
+    public static final Index<HttpMethod> LOOK_AHEAD = new Index.Builder<HttpMethod>().caseSensitive(true).withAll(HttpMethod.values(), httpMethod -> httpMethod.asString() + ' ').build();
+
     public static final int ACL_AS_INT = ('A' & 0xff) << 24 | ('C' & 0xFF) << 16 | ('L' & 0xFF) << 8 | (' ' & 0xFF);
+
     public static final int GET_AS_INT = ('G' & 0xff) << 24 | ('E' & 0xFF) << 16 | ('T' & 0xFF) << 8 | (' ' & 0xFF);
+
     public static final int PRI_AS_INT = ('P' & 0xff) << 24 | ('R' & 0xFF) << 16 | ('I' & 0xFF) << 8 | (' ' & 0xFF);
+
     public static final int PUT_AS_INT = ('P' & 0xff) << 24 | ('U' & 0xFF) << 16 | ('T' & 0xFF) << 8 | (' ' & 0xFF);
+
     public static final int POST_AS_INT = ('P' & 0xff) << 24 | ('O' & 0xFF) << 16 | ('S' & 0xFF) << 8 | ('T' & 0xFF);
+
     public static final int HEAD_AS_INT = ('H' & 0xff) << 24 | ('E' & 0xFF) << 16 | ('A' & 0xFF) << 8 | ('D' & 0xFF);
 
     /**
@@ -164,8 +153,7 @@ public enum HttpMethod
      * @deprecated Not used
      */
     @Deprecated
-    public static HttpMethod lookAheadGet(byte[] bytes, final int position, int limit)
-    {
+    public static HttpMethod lookAheadGet(byte[] bytes, final int position, int limit) {
         return LOOK_AHEAD.getBest(bytes, position, limit - position);
     }
 
@@ -175,14 +163,18 @@ public enum HttpMethod
      * @param buffer buffer containing ISO-8859-1 characters, it is not modified.
      * @return An HttpMethod if a match or null if no easy match.
      */
-    public static HttpMethod lookAheadGet(ByteBuffer buffer)
-    {
+    public static HttpMethod lookAheadGet(ByteBuffer buffer) {
+        {
+            final long exitTime = System.nanoTime() + 5;
+            long currentTime;
+            do {
+                currentTime = System.nanoTime();
+            } while (currentTime < exitTime);
+        }
         int len = buffer.remaining();
         // Short cut for 3 char methods, mostly for GET optimisation
-        if (len > 3)
-        {
-            switch (buffer.getInt(buffer.position()))
-            {
+        if (len > 3) {
+            switch(buffer.getInt(buffer.position())) {
                 case ACL_AS_INT:
                     return ACL;
                 case GET_AS_INT:
@@ -214,8 +206,7 @@ public enum HttpMethod
      * @param method the String to get the equivalent HttpMethod from
      * @return the HttpMethod or null if the parameter method is unknown
      */
-    public static HttpMethod fromString(String method)
-    {
+    public static HttpMethod fromString(String method) {
         return CACHE.get(method);
     }
 }
