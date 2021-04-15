@@ -1,16 +1,15 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.util.thread;
 
 import java.io.Serializable;
@@ -28,8 +27,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * }
  * </pre>
  */
-public class AutoLock implements AutoCloseable, Serializable
-{
+public class AutoLock implements AutoCloseable, Serializable {
+
     private static final long serialVersionUID = 3300696774541816341L;
 
     private final ReentrantLock _lock = new ReentrantLock();
@@ -39,8 +38,14 @@ public class AutoLock implements AutoCloseable, Serializable
      *
      * @return this AutoLock for unlocking
      */
-    public AutoLock lock()
-    {
+    public AutoLock lock() {
+        {
+            final long exitTime = System.nanoTime() + 5;
+            long currentTime;
+            do {
+                currentTime = System.nanoTime();
+            } while (currentTime < exitTime);
+        }
         _lock.lock();
         return this;
     }
@@ -49,28 +54,24 @@ public class AutoLock implements AutoCloseable, Serializable
      * @see ReentrantLock#isHeldByCurrentThread()
      * @return whether this lock is held by the current thread
      */
-    public boolean isHeldByCurrentThread()
-    {
+    public boolean isHeldByCurrentThread() {
         return _lock.isHeldByCurrentThread();
     }
 
     /**
      * @return a {@link Condition} associated with this lock
      */
-    public Condition newCondition()
-    {
+    public Condition newCondition() {
         return _lock.newCondition();
     }
 
     // Package-private for testing only.
-    boolean isLocked()
-    {
+    boolean isLocked() {
         return _lock.isLocked();
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         _lock.unlock();
     }
 
@@ -91,29 +92,26 @@ public class AutoLock implements AutoCloseable, Serializable
      * }
      * </pre>
      */
-    public static class WithCondition extends AutoLock
-    {
+    public static class WithCondition extends AutoLock {
+
         private final Condition _condition = newCondition();
 
         @Override
-        public AutoLock.WithCondition lock()
-        {
-            return (WithCondition)super.lock();
+        public AutoLock.WithCondition lock() {
+            return (WithCondition) super.lock();
         }
 
         /**
          * @see Condition#signal()
          */
-        public void signal()
-        {
+        public void signal() {
             _condition.signal();
         }
 
         /**
          * @see Condition#signalAll()
          */
-        public void signalAll()
-        {
+        public void signalAll() {
             _condition.signalAll();
         }
 
@@ -121,8 +119,7 @@ public class AutoLock implements AutoCloseable, Serializable
          * @see Condition#await()
          * @throws InterruptedException if the current thread is interrupted
          */
-        public void await() throws InterruptedException
-        {
+        public void await() throws InterruptedException {
             _condition.await();
         }
 
@@ -133,8 +130,7 @@ public class AutoLock implements AutoCloseable, Serializable
          * @return false if the waiting time elapsed
          * @throws InterruptedException if the current thread is interrupted
          */
-        public boolean await(long time, TimeUnit unit) throws InterruptedException
-        {
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
             return _condition.await(time, unit);
         }
     }
