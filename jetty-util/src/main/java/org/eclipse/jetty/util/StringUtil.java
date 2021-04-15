@@ -1,16 +1,15 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.util;
 
 import java.io.UnsupportedEncodingException;
@@ -26,25 +25,21 @@ import java.util.List;
  * main aim of the optimizations is to avoid object creation unless
  * absolutely required.
  */
-public class StringUtil
-{
+public class StringUtil {
+
     public static final String ALL_INTERFACES = "0.0.0.0";
+
     public static final String CRLF = "\r\n";
+
     public static final String DEFAULT_DELIMS = ",;";
 
     public static final String __ISO_8859_1 = "iso-8859-1";
+
     public static final String __UTF8 = "utf-8";
+
     public static final String __UTF16 = "utf-16";
 
-    private static final Index<String> CHARSETS = new Index.Builder<String>()
-        .caseSensitive(false)
-        .with("utf-8", __UTF8)
-        .with("utf8", __UTF8)
-        .with("utf-16", __UTF16)
-        .with("utf16", __UTF16)
-        .with("iso-8859-1", __ISO_8859_1)
-        .with("iso_8859_1", __ISO_8859_1)
-        .build();
+    private static final Index<String> CHARSETS = new Index.Builder<String>().caseSensitive(false).with("utf-8", __UTF8).with("utf8", __UTF8).with("utf-16", __UTF16).with("utf16", __UTF16).with("iso-8859-1", __ISO_8859_1).with("iso_8859_1", __ISO_8859_1).build();
 
     /**
      * Convert alternate charset names (eg utf8) to normalized
@@ -53,8 +48,7 @@ public class StringUtil
      * @param s the charset to normalize
      * @return the normalized charset (or null if normalized version not found)
      */
-    public static String normalizeCharset(String s)
-    {
+    public static String normalizeCharset(String s) {
         String n = CHARSETS.get(s);
         return (n == null) ? s : n;
     }
@@ -68,64 +62,25 @@ public class StringUtil
      * @param length the length of the charset in the input param
      * @return the normalized charset (or null if not found)
      */
-    public static String normalizeCharset(String s, int offset, int length)
-    {
+    public static String normalizeCharset(String s, int offset, int length) {
         String n = CHARSETS.get(s, offset, length);
         return (n == null) ? s.substring(offset, offset + length) : n;
     }
 
     // @checkstyle-disable-check : IllegalTokenTextCheck
-    private static final char[] LOWERCASES =
-    {
-        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
-        '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
-        '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047',
-        '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067',
-        '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-        '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-        '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
-        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-        '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167',
-        '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177'
-    };
+    private static final char[] LOWERCASES = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     // @checkstyle-disable-check : IllegalTokenTextCheck
-    private static final char[] UPPERCASES =
-    {
-        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007',
-        '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027',
-        '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047',
-        '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067',
-        '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-        '\100', '\101', '\102', '\103', '\104', '\105', '\106', '\107',
-        '\110', '\111', '\112', '\113', '\114', '\115', '\116', '\117',
-        '\120', '\121', '\122', '\123', '\124', '\125', '\126', '\127',
-        '\130', '\131', '\132', '\133', '\134', '\135', '\136', '\137',
-        '\140', '\101', '\102', '\103', '\104', '\105', '\106', '\107',
-        '\110', '\111', '\112', '\113', '\114', '\115', '\116', '\117',
-        '\120', '\121', '\122', '\123', '\124', '\125', '\126', '\127',
-        '\130', '\131', '\132', '\173', '\174', '\175', '\176', '\177'
-    };
+    private static final char[] UPPERCASES = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\101', '\102', '\103', '\104', '\105', '\106', '\107', '\110', '\111', '\112', '\113', '\114', '\115', '\116', '\117', '\120', '\121', '\122', '\123', '\124', '\125', '\126', '\127', '\130', '\131', '\132', '\133', '\134', '\135', '\136', '\137', '\140', '\101', '\102', '\103', '\104', '\105', '\106', '\107', '\110', '\111', '\112', '\113', '\114', '\115', '\116', '\117', '\120', '\121', '\122', '\123', '\124', '\125', '\126', '\127', '\130', '\131', '\132', '\173', '\174', '\175', '\176', '\177' };
 
     // @checkstyle-enable-check : IllegalTokenTextCheck
-
     /**
      * fast lower case conversion. Only works on ascii (not unicode)
      *
      * @param c the char to convert
      * @return a lower case version of c
      */
-    public static char asciiToLowerCase(char c)
-    {
+    public static char asciiToLowerCase(char c) {
         return (c < 0x80) ? LOWERCASES[c] : c;
     }
 
@@ -135,9 +90,8 @@ public class StringUtil
      * @param c the byte to convert
      * @return a lower case version of c
      */
-    public static byte asciiToLowerCase(byte c)
-    {
-        return (c > 0) ? (byte)LOWERCASES[c] : c;
+    public static byte asciiToLowerCase(byte c) {
+        return (c > 0) ? (byte) LOWERCASES[c] : c;
     }
 
     /**
@@ -146,8 +100,7 @@ public class StringUtil
      * @param c the char to convert
      * @return a upper case version of c
      */
-    public static char asciiToUpperCase(char c)
-    {
+    public static char asciiToUpperCase(char c) {
         return (c < 0x80) ? UPPERCASES[c] : c;
     }
 
@@ -157,9 +110,8 @@ public class StringUtil
      * @param c the byte to convert
      * @return a upper case version of c
      */
-    public static byte asciiToUpperCase(byte c)
-    {
-        return (c > 0) ? (byte)UPPERCASES[c] : c;
+    public static byte asciiToUpperCase(byte c) {
+        return (c > 0) ? (byte) UPPERCASES[c] : c;
     }
 
     /**
@@ -168,34 +120,27 @@ public class StringUtil
      * @param s the string to convert
      * @return a lower case version of s
      */
-    public static String asciiToLowerCase(String s)
-    {
+    public static String asciiToLowerCase(String s) {
         if (s == null)
             return null;
-
         char[] c = null;
         int i = s.length();
         // look for first conversion
-        while (i-- > 0)
-        {
+        while (i-- > 0) {
             char c1 = s.charAt(i);
-            if (c1 <= 127)
-            {
+            if (c1 <= 127) {
                 char c2 = LOWERCASES[c1];
-                if (c1 != c2)
-                {
+                if (c1 != c2) {
                     c = s.toCharArray();
                     c[i] = c2;
                     break;
                 }
             }
         }
-        while (i-- > 0)
-        {
+        while (i-- > 0) {
             if (c[i] <= 127)
                 c[i] = LOWERCASES[c[i]];
         }
-
         return c == null ? s : new String(c);
     }
 
@@ -205,30 +150,24 @@ public class StringUtil
      * @param s the string to convert
      * @return a lower case version of s
      */
-    public static String asciiToUpperCase(String s)
-    {
+    public static String asciiToUpperCase(String s) {
         if (s == null)
             return null;
-
         char[] c = null;
         int i = s.length();
         // look for first conversion
-        while (i-- > 0)
-        {
+        while (i-- > 0) {
             char c1 = s.charAt(i);
-            if (c1 <= 127)
-            {
+            if (c1 <= 127) {
                 char c2 = UPPERCASES[c1];
-                if (c1 != c2)
-                {
+                if (c1 != c2) {
                     c = s.toCharArray();
                     c[i] = c2;
                     break;
                 }
             }
         }
-        while (i-- > 0)
-        {
+        while (i-- > 0) {
             if (c[i] <= 127)
                 c[i] = UPPERCASES[c[i]];
         }
@@ -253,51 +192,37 @@ public class StringUtil
      * @param str the raw input string
      * @return the sanitized output string. or null if {@code str} is null.
      */
-    public static String sanitizeFileSystemName(String str)
-    {
+    public static String sanitizeFileSystemName(String str) {
         if (str == null)
             return null;
-
         char[] chars = str.toCharArray();
         int len = chars.length;
-        for (int i = 0; i < len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             char c = chars[i];
-            if ((c <= 0x1F) || // control characters
-                (c >= 0x7F) || // over 7-bit printable ASCII
-                // piping : special meaning on unix / osx / windows
-                (c == '|') || (c == '>') || (c == '<') || (c == '/') || (c == '&') ||
-                // special characters on windows
-                (c == '\\') || (c == '.') || (c == ':') ||
-                // special characters on osx
-                (c == '=') || (c == '"') || (c == ',') ||
-                // glob / selection characters on most OS's
-                (c == '*') || (c == '?') ||
-                // bang execution on unix / osx
-                (c == '!') ||
-                // spaces are just generally difficult to work with
-                (c == ' '))
-            {
+            if (// control characters
+            (c <= 0x1F) || // over 7-bit printable ASCII
+            (c >= 0x7F) || // piping : special meaning on unix / osx / windows
+            (c == '|') || (c == '>') || (c == '<') || (c == '/') || (c == '&') || // special characters on windows
+            (c == '\\') || (c == '.') || (c == ':') || // special characters on osx
+            (c == '=') || (c == '"') || (c == ',') || // glob / selection characters on most OS's
+            (c == '*') || (c == '?') || // bang execution on unix / osx
+            (c == '!') || // spaces are just generally difficult to work with
+            (c == ' ')) {
                 chars[i] = '_';
             }
         }
         return String.valueOf(chars);
     }
 
-    public static boolean startsWithIgnoreCase(String s, String w)
-    {
+    public static boolean startsWithIgnoreCase(String s, String w) {
         if (w == null)
             return true;
-
         if (s == null || s.length() < w.length())
             return false;
-
-        for (int i = 0; i < w.length(); i++)
-        {
+        for (int i = 0; i < w.length(); i++) {
             char c1 = s.charAt(i);
             char c2 = w.charAt(i);
-            if (c1 != c2)
-            {
+            if (c1 != c2) {
                 if (c1 <= 127)
                     c1 = LOWERCASES[c1];
                 if (c2 <= 127)
@@ -309,25 +234,19 @@ public class StringUtil
         return true;
     }
 
-    public static boolean endsWithIgnoreCase(String s, String w)
-    {
+    public static boolean endsWithIgnoreCase(String s, String w) {
         if (w == null)
             return true;
         if (s == null)
             return false;
-
         int sl = s.length();
         int wl = w.length();
-
         if (sl < wl)
             return false;
-
-        for (int i = wl; i-- > 0; )
-        {
+        for (int i = wl; i-- > 0; ) {
             char c1 = s.charAt(--sl);
             char c2 = w.charAt(i);
-            if (c1 != c2)
-            {
+            if (c1 != c2) {
                 if (c1 <= 127)
                     c1 = LOWERCASES[c1];
                 if (c2 <= 127)
@@ -346,10 +265,8 @@ public class StringUtil
      * @param chars the chars to look for
      * @return the index of the character in the input stream found.
      */
-    public static int indexFrom(String s, String chars)
-    {
-        for (int i = 0; i < s.length(); i++)
-        {
+    public static int indexFrom(String s, String chars) {
+        for (int i = 0; i < s.length(); i++) {
             if (chars.indexOf(s.charAt(i)) >= 0)
                 return i;
         }
@@ -367,24 +284,19 @@ public class StringUtil
      * @param with the char to replace with
      * @return the now replaced string
      */
-    public static String replace(String str, char find, char with)
-    {
+    public static String replace(String str, char find, char with) {
         if (str == null)
             return null;
-
         if (find == with)
             return str;
-
         int c = 0;
         int idx = str.indexOf(find, c);
-        if (idx == -1)
-        {
+        if (idx == -1) {
             return str;
         }
         char[] chars = str.toCharArray();
         int len = chars.length;
-        for (int i = idx; i < len; i++)
-        {
+        for (int i = idx; i < len; i++) {
             if (chars[i] == find)
                 chars[i] = with;
         }
@@ -402,27 +314,28 @@ public class StringUtil
      * @param with the string to replace with
      * @return the now replaced string
      */
-    public static String replace(String s, String sub, String with)
-    {
+    public static String replace(String s, String sub, String with) {
+        {
+            final long exitTime = System.nanoTime() + 5;
+            long currentTime;
+            do {
+                currentTime = System.nanoTime();
+            } while (currentTime < exitTime);
+        }
         if (s == null)
             return null;
-
         int c = 0;
         int i = s.indexOf(sub, c);
-        if (i == -1)
-        {
+        if (i == -1) {
             return s;
         }
         StringBuilder buf = new StringBuilder(s.length() + with.length());
-        do
-        {
+        do {
             buf.append(s, c, i);
             buf.append(with);
             c = i + sub.length();
-        }
-        while ((i = s.indexOf(sub, c)) != -1);
-        if (c < s.length())
-        {
+        } while ((i = s.indexOf(sub, c)) != -1);
+        if (c < s.length()) {
             buf.append(s.substring(c));
         }
         return buf.toString();
@@ -440,12 +353,10 @@ public class StringUtil
      * @param replacement the replacement string to use
      * @return the replaced string
      */
-    public static String replaceFirst(String original, String target, String replacement)
-    {
+    public static String replaceFirst(String original, String target, String replacement) {
         int idx = original.indexOf(target);
         if (idx == -1)
             return original;
-
         int offset = 0;
         int originalLen = original.length();
         StringBuilder buf = new StringBuilder(originalLen + replacement.length());
@@ -453,7 +364,6 @@ public class StringUtil
         offset += idx + target.length();
         buf.append(replacement);
         buf.append(original, offset, originalLen);
-
         return buf.toString();
     }
 
@@ -465,16 +375,10 @@ public class StringUtil
      * @param offset The offset of the substring
      * @param length The length of the substring
      */
-    public static void append(StringBuilder buf,
-                              String s,
-                              int offset,
-                              int length)
-    {
-        synchronized (buf)
-        {
+    public static void append(StringBuilder buf, String s, int offset, int length) {
+        synchronized (buf) {
             int end = offset + length;
-            for (int i = offset; i < end; i++)
-            {
+            for (int i = offset; i < end; i++) {
                 if (i >= s.length())
                     break;
                 buf.append(s.charAt(i));
@@ -489,17 +393,16 @@ public class StringUtil
      * @param b the byte to append
      * @param base the base of the hex output (almost always 16).
      */
-    public static void append(StringBuilder buf, byte b, int base)
-    {
+    public static void append(StringBuilder buf, byte b, int base) {
         int bi = 0xff & b;
         int c = '0' + (bi / base) % base;
         if (c > '9')
             c = 'a' + (c - '0' - 10);
-        buf.append((char)c);
+        buf.append((char) c);
         c = '0' + bi % base;
         if (c > '9')
             c = 'a' + (c - '0' - 10);
-        buf.append((char)c);
+        buf.append((char) c);
     }
 
     /**
@@ -508,12 +411,10 @@ public class StringUtil
      * @param buf the buffer to append to
      * @param i the value to append
      */
-    public static void append2digits(StringBuffer buf, int i)
-    {
-        if (i < 100)
-        {
-            buf.append((char)(i / 10 + '0'));
-            buf.append((char)(i % 10 + '0'));
+    public static void append2digits(StringBuffer buf, int i) {
+        if (i < 100) {
+            buf.append((char) (i / 10 + '0'));
+            buf.append((char) (i % 10 + '0'));
         }
     }
 
@@ -523,12 +424,10 @@ public class StringUtil
      * @param buf the buffer to append to
      * @param i the value to append
      */
-    public static void append2digits(StringBuilder buf, int i)
-    {
-        if (i < 100)
-        {
-            buf.append((char)(i / 10 + '0'));
-            buf.append((char)(i % 10 + '0'));
+    public static void append2digits(StringBuilder buf, int i) {
+        if (i < 100) {
+            buf.append((char) (i / 10 + '0'));
+            buf.append((char) (i % 10 + '0'));
         }
     }
 
@@ -538,11 +437,9 @@ public class StringUtil
      * @param s the string to use
      * @param n the number of times this string should be appended
      */
-    public static String stringFrom(String s, int n)
-    {
+    public static String stringFrom(String s, int n) {
         StringBuilder stringBuilder = new StringBuilder(s.length() * n);
-        for (int i = 0; i < n; i++)
-        {
+        for (int i = 0; i < n; i++) {
             stringBuilder.append(s);
         }
         return stringBuilder.toString();
@@ -554,38 +451,30 @@ public class StringUtil
      * @param s String
      * @return The string passed in or empty string if it is null.
      */
-    public static String nonNull(String s)
-    {
+    public static String nonNull(String s) {
         if (s == null)
             return "";
         return s;
     }
 
-    public static boolean equals(String s, char[] buf, int offset, int length)
-    {
+    public static boolean equals(String s, char[] buf, int offset, int length) {
         if (s.length() != length)
             return false;
-        for (int i = 0; i < length; i++)
-        {
+        for (int i = 0; i < length; i++) {
             if (buf[offset + i] != s.charAt(i))
                 return false;
         }
         return true;
     }
 
-    public static String toUTF8String(byte[] b, int offset, int length)
-    {
+    public static String toUTF8String(byte[] b, int offset, int length) {
         return new String(b, offset, length, StandardCharsets.UTF_8);
     }
 
-    public static String toString(byte[] b, int offset, int length, String charset)
-    {
-        try
-        {
+    public static String toString(byte[] b, int offset, int length, String charset) {
+        try {
             return new String(b, offset, length, charset);
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             throw new IllegalArgumentException(e);
         }
     }
@@ -617,17 +506,13 @@ public class StringUtil
      * @param str the string to test.
      * @return the index of first control character in string, -1 if no control characters encountered
      */
-    public static int indexOfControlChars(String str)
-    {
-        if (str == null)
-        {
+    public static int indexOfControlChars(String str) {
+        if (str == null) {
             return -1;
         }
         int len = str.length();
-        for (int i = 0; i < len; i++)
-        {
-            if (Character.isISOControl(str.codePointAt(i)))
-            {
+        for (int i = 0; i < len; i++) {
+            if (Character.isISOControl(str.codePointAt(i))) {
                 // found a control character, we can stop searching  now
                 return i;
             }
@@ -655,17 +540,13 @@ public class StringUtil
      * @param str the string to test.
      * @return true if string is null or only whitespace characters, false if non-whitespace characters encountered.
      */
-    public static boolean isBlank(String str)
-    {
-        if (str == null)
-        {
+    public static boolean isBlank(String str) {
+        if (str == null) {
             return true;
         }
         int len = str.length();
-        for (int i = 0; i < len; i++)
-        {
-            if (!Character.isWhitespace(str.codePointAt(i)))
-            {
+        for (int i = 0; i < len; i++) {
+            if (!Character.isWhitespace(str.codePointAt(i))) {
                 // found a non-whitespace, we can stop searching  now
                 return false;
             }
@@ -691,8 +572,7 @@ public class StringUtil
      * @param str the string to test.
      * @return true if string is null or empty.
      */
-    public static boolean isEmpty(String str)
-    {
+    public static boolean isEmpty(String str) {
         return str == null || str.isEmpty();
     }
 
@@ -715,17 +595,13 @@ public class StringUtil
      * @param str the string to test.
      * @return true if string is not null and has at least 1 non-whitespace character, false if null or all-whitespace characters.
      */
-    public static boolean isNotBlank(String str)
-    {
-        if (str == null)
-        {
+    public static boolean isNotBlank(String str) {
+        if (str == null) {
             return false;
         }
         int len = str.length();
-        for (int i = 0; i < len; i++)
-        {
-            if (!Character.isWhitespace(str.codePointAt(i)))
-            {
+        for (int i = 0; i < len; i++) {
+            if (!Character.isWhitespace(str.codePointAt(i))) {
                 // found a non-whitespace, we can stop searching  now
                 return true;
             }
@@ -734,38 +610,28 @@ public class StringUtil
         return false;
     }
 
-    public static boolean isUTF8(String charset)
-    {
+    public static boolean isUTF8(String charset) {
         return __UTF8.equalsIgnoreCase(charset) || __UTF8.equalsIgnoreCase(normalizeCharset(charset));
     }
 
-    public static boolean isHex(String str, int offset, int length)
-    {
-        if (offset + length > str.length())
-        {
+    public static boolean isHex(String str, int offset, int length) {
+        if (offset + length > str.length()) {
             return false;
         }
-
-        for (int i = offset; i < (offset + length); i++)
-        {
+        for (int i = offset; i < (offset + length); i++) {
             char c = str.charAt(i);
-            if (!(((c >= 'a') && (c <= 'f')) ||
-                ((c >= 'A') && (c <= 'F')) ||
-                ((c >= '0') && (c <= '9'))))
-            {
+            if (!(((c >= 'a') && (c <= 'f')) || ((c >= 'A') && (c <= 'F')) || ((c >= '0') && (c <= '9')))) {
                 return false;
             }
         }
         return true;
     }
 
-    public static String printable(String name)
-    {
+    public static String printable(String name) {
         if (name == null)
             return null;
         StringBuilder buf = new StringBuilder(name.length());
-        for (int i = 0; i < name.length(); i++)
-        {
+        for (int i = 0; i < name.length(); i++) {
             char c = name.charAt(i);
             if (!Character.isISOControl(c))
                 buf.append(c);
@@ -773,16 +639,13 @@ public class StringUtil
         return buf.toString();
     }
 
-    public static String printable(byte[] b)
-    {
+    public static String printable(byte[] b) {
         StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < b.length; i++)
-        {
-            char c = (char)b[i];
+        for (int i = 0; i < b.length; i++) {
+            char c = (char) b[i];
             if (Character.isWhitespace(c) || c > ' ' && c < 0x7f)
                 buf.append(c);
-            else
-            {
+            else {
                 buf.append("0x");
                 TypeUtil.toHex(b[i], buf);
             }
@@ -790,25 +653,19 @@ public class StringUtil
         return buf.toString();
     }
 
-    public static byte[] getBytes(String s)
-    {
+    public static byte[] getBytes(String s) {
         return s.getBytes(StandardCharsets.ISO_8859_1);
     }
 
-    public static byte[] getBytes(String s, String charset)
-    {
-        try
-        {
+    public static byte[] getBytes(String s, String charset) {
+        try {
             return s.getBytes(charset);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return s.getBytes();
         }
     }
 
-    public static byte[] getUtf8Bytes(String s)
-    {
+    public static byte[] getUtf8Bytes(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -819,29 +676,21 @@ public class StringUtil
      * @param from The index to start parsing from
      * @return an int
      */
-    public static int toInt(String string, int from)
-    {
+    public static int toInt(String string, int from) {
         int val = 0;
         boolean started = false;
         boolean minus = false;
-        for (int i = from; i < string.length(); i++)
-        {
+        for (int i = from; i < string.length(); i++) {
             char b = string.charAt(i);
-            if (b <= ' ')
-            {
+            if (b <= ' ') {
                 if (started)
                     break;
-            }
-            else if (b >= '0' && b <= '9')
-            {
+            } else if (b >= '0' && b <= '9') {
                 val = val * 10 + (b - '0');
                 started = true;
-            }
-            else if (b == '-' && !started)
-            {
+            } else if (b == '-' && !started) {
                 minus = true;
-            }
-            else
+            } else
                 break;
         }
         if (started)
@@ -855,29 +704,21 @@ public class StringUtil
      * @param string A String containing an integer.
      * @return an int
      */
-    public static long toLong(String string)
-    {
+    public static long toLong(String string) {
         long val = 0;
         boolean started = false;
         boolean minus = false;
-        for (int i = 0; i < string.length(); i++)
-        {
+        for (int i = 0; i < string.length(); i++) {
             char b = string.charAt(i);
-            if (b <= ' ')
-            {
+            if (b <= ' ') {
                 if (started)
                     break;
-            }
-            else if (b >= '0' && b <= '9')
-            {
+            } else if (b >= '0' && b <= '9') {
                 val = val * 10L + (b - '0');
                 started = true;
-            }
-            else if (b == '-' && !started)
-            {
+            } else if (b == '-' && !started) {
                 minus = true;
-            }
-            else
+            } else
                 break;
         }
         if (started)
@@ -892,14 +733,11 @@ public class StringUtil
      * @param maxSize the maximum size of the string
      * @return the truncated string.  if <code>str</code> param is null, then the returned string will also be null.
      */
-    public static String truncate(String str, int maxSize)
-    {
-        if (str == null)
-        {
+    public static String truncate(String str, int maxSize) {
+        if (str == null) {
             return null;
         }
-        if (str.length() <= maxSize)
-        {
+        if (str.length() <= maxSize) {
             return str;
         }
         return str.substring(0, maxSize);
@@ -911,14 +749,13 @@ public class StringUtil
      * @param s The string to parse, expected to be enclosed as '[...]'
      * @return An array of parsed values.
      */
-    public static String[] arrayFromString(String s)
-    {
+    public static String[] arrayFromString(String s) {
         if (s == null)
-            return new String[]{};
+            return new String[] {};
         if (!s.startsWith("[") || !s.endsWith("]"))
             throw new IllegalArgumentException();
         if (s.length() == 2)
-            return new String[]{};
+            return new String[] {};
         return csvSplit(s, 1, s.length() - 2);
     }
 
@@ -928,8 +765,7 @@ public class StringUtil
      * @param s The string to parse
      * @return An array of parsed values.
      */
-    public static String[] csvSplit(String s)
-    {
+    public static String[] csvSplit(String s) {
         if (s == null)
             return null;
         return csvSplit(s, 0, s.length());
@@ -943,8 +779,7 @@ public class StringUtil
      * @param len The len in characters to parse
      * @return An array of parsed values.
      */
-    public static String[] csvSplit(String s, int off, int len)
-    {
+    public static String[] csvSplit(String s, int off, int len) {
         if (s == null)
             return null;
         if (off < 0 || len < 0 || off > s.length())
@@ -954,9 +789,14 @@ public class StringUtil
         return list.toArray(new String[list.size()]);
     }
 
-    enum CsvSplitState
-    {
-        PRE_DATA, QUOTE, SLOSH, DATA, WHITE, POST_DATA
+    enum CsvSplitState {
+
+        PRE_DATA,
+        QUOTE,
+        SLOSH,
+        DATA,
+        WHITE,
+        POST_DATA
     }
 
     /**
@@ -975,49 +815,38 @@ public class StringUtil
      * @param len The len in characters to parse
      * @return list containing the parsed list values
      */
-    public static List<String> csvSplit(List<String> list, String s, int off, int len)
-    {
+    public static List<String> csvSplit(List<String> list, String s, int off, int len) {
         if (list == null)
             list = new ArrayList<>();
         CsvSplitState state = CsvSplitState.PRE_DATA;
         StringBuilder out = new StringBuilder();
         int last = -1;
-        while (len > 0)
-        {
+        while (len > 0) {
             char ch = s.charAt(off++);
             len--;
-
-            switch (state)
-            {
+            switch(state) {
                 case PRE_DATA:
                     if (Character.isWhitespace(ch))
                         continue;
-                    if ('"' == ch)
-                    {
+                    if ('"' == ch) {
                         state = CsvSplitState.QUOTE;
                         continue;
                     }
-
-                    if (',' == ch)
-                    {
+                    if (',' == ch) {
                         list.add("");
                         continue;
                     }
                     state = CsvSplitState.DATA;
                     out.append(ch);
                     continue;
-
                 case DATA:
-                    if (Character.isWhitespace(ch))
-                    {
+                    if (Character.isWhitespace(ch)) {
                         last = out.length();
                         out.append(ch);
                         state = CsvSplitState.WHITE;
                         continue;
                     }
-
-                    if (',' == ch)
-                    {
+                    if (',' == ch) {
                         list.add(out.toString());
                         out.setLength(0);
                         state = CsvSplitState.PRE_DATA;
@@ -1025,36 +854,28 @@ public class StringUtil
                     }
                     out.append(ch);
                     continue;
-
                 case WHITE:
-                    if (Character.isWhitespace(ch))
-                    {
+                    if (Character.isWhitespace(ch)) {
                         out.append(ch);
                         continue;
                     }
-
-                    if (',' == ch)
-                    {
+                    if (',' == ch) {
                         out.setLength(last);
                         list.add(out.toString());
                         out.setLength(0);
                         state = CsvSplitState.PRE_DATA;
                         continue;
                     }
-
                     state = CsvSplitState.DATA;
                     out.append(ch);
                     last = -1;
                     continue;
-
                 case QUOTE:
-                    if ('\\' == ch)
-                    {
+                    if ('\\' == ch) {
                         state = CsvSplitState.SLOSH;
                         continue;
                     }
-                    if ('"' == ch)
-                    {
+                    if ('"' == ch) {
                         list.add(out.toString());
                         out.setLength(0);
                         state = CsvSplitState.POST_DATA;
@@ -1062,62 +883,47 @@ public class StringUtil
                     }
                     out.append(ch);
                     continue;
-
                 case SLOSH:
                     out.append(ch);
                     state = CsvSplitState.QUOTE;
                     continue;
-
                 case POST_DATA:
-                    if (',' == ch)
-                    {
+                    if (',' == ch) {
                         state = CsvSplitState.PRE_DATA;
                         continue;
                     }
                     continue;
-
                 default:
                     throw new IllegalStateException(state.toString());
             }
         }
-        switch (state)
-        {
+        switch(state) {
             case PRE_DATA:
             case POST_DATA:
                 break;
-
             case DATA:
             case QUOTE:
             case SLOSH:
                 list.add(out.toString());
                 break;
-
             case WHITE:
                 out.setLength(last);
                 list.add(out.toString());
                 break;
-
             default:
                 throw new IllegalStateException(state.toString());
         }
-
         return list;
     }
 
-    public static String sanitizeXmlString(String html)
-    {
+    public static String sanitizeXmlString(String html) {
         if (html == null)
             return null;
-
         int i = 0;
-
         // Are there any characters that need sanitizing?
-        loop:
-        for (; i < html.length(); i++)
-        {
+        loop: for (; i < html.length(); i++) {
             char c = html.charAt(i);
-            switch (c)
-            {
+            switch(c) {
                 case '&':
                 case '<':
                 case '>':
@@ -1132,17 +938,13 @@ public class StringUtil
         // No characters need sanitizing, so return original string
         if (i == html.length())
             return html;
-
-        // Create builder with OK content so far 
+        // Create builder with OK content so far
         StringBuilder out = new StringBuilder(html.length() * 4 / 3);
         out.append(html, 0, i);
-
         // sanitize remaining content
-        for (; i < html.length(); i++)
-        {
+        for (; i < html.length(); i++) {
             char c = html.charAt(i);
-            switch (c)
-            {
+            switch(c) {
                 case '&':
                     out.append("&amp;");
                     break;
@@ -1168,8 +970,7 @@ public class StringUtil
         return out.toString();
     }
 
-    public static String strip(String str, String find)
-    {
+    public static String strip(String str, String find) {
         return StringUtil.replace(str, find, "");
     }
 
@@ -1181,8 +982,7 @@ public class StringUtil
      * @param object The object
      * @return String value or null
      */
-    public static String valueOf(Object object)
-    {
+    public static String valueOf(Object object) {
         return object == null ? null : String.valueOf(object);
     }
 }
