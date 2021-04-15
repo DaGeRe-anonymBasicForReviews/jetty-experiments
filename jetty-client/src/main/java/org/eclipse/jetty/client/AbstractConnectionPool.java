@@ -1,16 +1,15 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.client;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
 import org.eclipse.jetty.client.api.Connection;
 import org.eclipse.jetty.util.Attachable;
 import org.eclipse.jetty.util.Callback;
@@ -38,28 +36,30 @@ import org.eclipse.jetty.util.component.Dumpable;
 import org.eclipse.jetty.util.thread.Sweeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static java.util.stream.Collectors.toCollection;
 
 @ManagedObject
-public abstract class AbstractConnectionPool extends ContainerLifeCycle implements ConnectionPool, Dumpable, Sweeper.Sweepable
-{
+public abstract class AbstractConnectionPool extends ContainerLifeCycle implements ConnectionPool, Dumpable, Sweeper.Sweepable {
+
     private static final Logger LOG = LoggerFactory.getLogger(AbstractConnectionPool.class);
 
     private final AtomicInteger pending = new AtomicInteger();
+
     private final HttpDestination destination;
+
     private final Callback requester;
+
     private final Pool<Connection> pool;
+
     private boolean maximizeConnections;
+
     private volatile long maxDurationNanos = 0L;
 
-    protected AbstractConnectionPool(HttpDestination destination, int maxConnections, boolean cache, Callback requester)
-    {
+    protected AbstractConnectionPool(HttpDestination destination, int maxConnections, boolean cache, Callback requester) {
         this(destination, new Pool<>(Pool.StrategyType.FIRST, maxConnections, cache), requester);
     }
 
-    protected AbstractConnectionPool(HttpDestination destination, Pool<Connection> pool, Callback requester)
-    {
+    protected AbstractConnectionPool(HttpDestination destination, Pool<Connection> pool, Callback requester) {
         this.destination = destination;
         this.requester = requester;
         this.pool = pool;
@@ -67,20 +67,16 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
     }
 
     @Override
-    protected void doStop() throws Exception
-    {
+    protected void doStop() throws Exception {
         pool.close();
     }
 
     @Override
-    public CompletableFuture<Void> preCreateConnections(int connectionCount)
-    {
+    public CompletableFuture<Void> preCreateConnections(int connectionCount) {
         if (LOG.isDebugEnabled())
             LOG.debug("Pre-creating connections {}/{}", connectionCount, getMaxConnectionCount());
-
         List<CompletableFuture<?>> futures = new ArrayList<>();
-        for (int i = 0; i < connectionCount; i++)
-        {
+        for (int i = 0; i < connectionCount; i++) {
             Pool<Connection>.Entry entry = pool.reserve();
             if (entry == null)
                 break;
@@ -105,82 +101,68 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
      * to handle closing idle connections.</p>
      */
     @ManagedAttribute(value = "The maximum duration in milliseconds a connection can be used for before it gets closed")
-    public long getMaxDuration()
-    {
+    public long getMaxDuration() {
         return TimeUnit.NANOSECONDS.toMillis(maxDurationNanos);
     }
 
-    public void setMaxDuration(long maxDurationInMs)
-    {
+    public void setMaxDuration(long maxDurationInMs) {
         this.maxDurationNanos = TimeUnit.MILLISECONDS.toNanos(maxDurationInMs);
     }
 
-    protected int getMaxMultiplex()
-    {
+    protected int getMaxMultiplex() {
         return pool.getMaxMultiplex();
     }
 
-    protected void setMaxMultiplex(int maxMultiplex)
-    {
+    protected void setMaxMultiplex(int maxMultiplex) {
         pool.setMaxMultiplex(maxMultiplex);
     }
 
-    protected int getMaxUsageCount()
-    {
+    protected int getMaxUsageCount() {
         return pool.getMaxUsageCount();
     }
 
-    protected void setMaxUsageCount(int maxUsageCount)
-    {
+    protected void setMaxUsageCount(int maxUsageCount) {
         pool.setMaxUsageCount(maxUsageCount);
     }
 
     @ManagedAttribute(value = "The number of active connections", readonly = true)
-    public int getActiveConnectionCount()
-    {
+    public int getActiveConnectionCount() {
         return pool.getInUseCount();
     }
 
     @ManagedAttribute(value = "The number of idle connections", readonly = true)
-    public int getIdleConnectionCount()
-    {
+    public int getIdleConnectionCount() {
         return pool.getIdleCount();
     }
 
     @ManagedAttribute(value = "The max number of connections", readonly = true)
-    public int getMaxConnectionCount()
-    {
+    public int getMaxConnectionCount() {
         return pool.getMaxEntries();
     }
 
     @ManagedAttribute(value = "The number of connections", readonly = true)
-    public int getConnectionCount()
-    {
+    public int getConnectionCount() {
         return pool.size();
     }
 
     @ManagedAttribute(value = "The number of pending connections", readonly = true)
-    public int getPendingConnectionCount()
-    {
+    public int getPendingConnectionCount() {
         return pending.get();
     }
 
     @Override
-    public boolean isEmpty()
-    {
+    public boolean isEmpty() {
         return pool.size() == 0;
     }
 
     @Override
     @ManagedAttribute("Whether this pool is closed")
-    public boolean isClosed()
-    {
+    public boolean isClosed() {
         return pool.isClosed();
     }
 
     @ManagedAttribute("Whether the pool tries to maximize the number of connections used")
-    public boolean isMaximizeConnections()
-    {
+    public boolean isMaximizeConnections() {
         return maximizeConnections;
     }
 
@@ -189,8 +171,7 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
      *
      * @param maximizeConnections whether the number of connections should be maximized
      */
-    public void setMaximizeConnections(boolean maximizeConnections)
-    {
+    public void setMaximizeConnections(boolean maximizeConnections) {
         this.maximizeConnections = maximizeConnections;
     }
 
@@ -211,13 +192,11 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
      * @see #tryCreate(boolean)
      */
     @Override
-    public Connection acquire(boolean create)
-    {
+    public Connection acquire(boolean create) {
         if (LOG.isDebugEnabled())
             LOG.debug("Acquiring create={} on {}", create, this);
         Connection connection = activate();
-        if (connection == null)
-        {
+        if (connection == null) {
             tryCreate(create);
             connection = activate();
         }
@@ -237,40 +216,30 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
      *
      * @param create a hint to request to create a connection
      */
-    protected void tryCreate(boolean create)
-    {
+    protected void tryCreate(boolean create) {
         int connectionCount = getConnectionCount();
         if (LOG.isDebugEnabled())
             LOG.debug("Try creating connection {}/{} with {} pending", connectionCount, getMaxConnectionCount(), getPendingConnectionCount());
-
         // If we have already pending sufficient multiplexed connections, then do not create another.
         int multiplexed = getMaxMultiplex();
-        while (true)
-        {
+        while (true) {
             int pending = this.pending.get();
             int supply = pending * multiplexed;
             int demand = destination.getQueuedRequestCount() + (create ? 1 : 0);
-
             boolean tryCreate = isMaximizeConnections() || supply < demand;
-
             if (LOG.isDebugEnabled())
                 LOG.debug("Try creating({}) connection, pending/demand/supply: {}/{}/{}, result={}", create, pending, demand, supply, tryCreate);
-
             if (!tryCreate)
                 return;
-
             if (this.pending.compareAndSet(pending, pending + 1))
                 break;
         }
-
         // Create the connection.
         Pool<Connection>.Entry entry = pool.reserve();
-        if (entry == null)
-        {
+        if (entry == null) {
             pending.decrementAndGet();
             return;
         }
-
         if (LOG.isDebugEnabled())
             LOG.debug("Creating connection {}/{} at {}", connectionCount, getMaxConnectionCount(), entry);
         Promise<Connection> future = new FutureConnection(entry);
@@ -278,8 +247,7 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
     }
 
     @Override
-    public boolean accept(Connection connection)
-    {
+    public boolean accept(Connection connection) {
         if (!(connection instanceof Attachable))
             throw new IllegalArgumentException("Invalid connection object: " + connection);
         Pool<Connection>.Entry entry = pool.reserve();
@@ -287,7 +255,7 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
             return false;
         if (LOG.isDebugEnabled())
             LOG.debug("onCreating {} {}", entry, connection);
-        Attachable attachable = (Attachable)connection;
+        Attachable attachable = (Attachable) connection;
         attachable.setAttachment(new EntryHolder(entry));
         onCreated(connection);
         entry.enable(connection, false);
@@ -295,26 +263,26 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
         return true;
     }
 
-    protected void proceed()
-    {
+    protected void proceed() {
         requester.succeeded();
     }
 
-    protected Connection activate()
-    {
-        while (true)
+    protected Connection activate() {
         {
+            final long exitTime = System.nanoTime() + 5;
+            long currentTime;
+            do {
+                currentTime = System.nanoTime();
+            } while (currentTime < exitTime);
+        }
+        while (true) {
             Pool<Connection>.Entry entry = pool.acquire();
-            if (entry != null)
-            {
+            if (entry != null) {
                 Connection connection = entry.getPooled();
-
                 long maxDurationNanos = this.maxDurationNanos;
-                if (maxDurationNanos > 0L)
-                {
-                    EntryHolder holder = (EntryHolder)((Attachable)connection).getAttachment();
-                    if (holder.isExpired(maxDurationNanos))
-                    {
+                if (maxDurationNanos > 0L) {
+                    EntryHolder holder = (EntryHolder) ((Attachable) connection).getAttachment();
+                    if (holder.isExpired(maxDurationNanos)) {
                         boolean canClose = remove(connection, true);
                         if (canClose)
                             IO.close(connection);
@@ -323,7 +291,6 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
                         continue;
                     }
                 }
-
                 if (LOG.isDebugEnabled())
                     LOG.debug("Activated {} {}", entry, pool);
                 acquired(connection);
@@ -334,32 +301,29 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
     }
 
     @Override
-    public boolean isActive(Connection connection)
-    {
+    public boolean isActive(Connection connection) {
         if (!(connection instanceof Attachable))
             throw new IllegalArgumentException("Invalid connection object: " + connection);
-        Attachable attachable = (Attachable)connection;
-        EntryHolder holder = (EntryHolder)attachable.getAttachment();
+        Attachable attachable = (Attachable) connection;
+        EntryHolder holder = (EntryHolder) attachable.getAttachment();
         if (holder == null)
             return false;
         return !holder.entry.isIdle();
     }
 
     @Override
-    public boolean release(Connection connection)
-    {
+    public boolean release(Connection connection) {
         if (!deactivate(connection))
             return false;
         released(connection);
         return idle(connection, isClosed());
     }
 
-    protected boolean deactivate(Connection connection)
-    {
+    protected boolean deactivate(Connection connection) {
         if (!(connection instanceof Attachable))
             throw new IllegalArgumentException("Invalid connection object: " + connection);
-        Attachable attachable = (Attachable)connection;
-        EntryHolder holder = (EntryHolder)attachable.getAttachment();
+        Attachable attachable = (Attachable) connection;
+        EntryHolder holder = (EntryHolder) attachable.getAttachment();
         if (holder == null)
             return true;
         boolean reusable = pool.release(holder.entry);
@@ -372,17 +336,15 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
     }
 
     @Override
-    public boolean remove(Connection connection)
-    {
+    public boolean remove(Connection connection) {
         return remove(connection, false);
     }
 
-    protected boolean remove(Connection connection, boolean force)
-    {
+    protected boolean remove(Connection connection, boolean force) {
         if (!(connection instanceof Attachable))
             throw new IllegalArgumentException("Invalid connection object: " + connection);
-        Attachable attachable = (Attachable)connection;
-        EntryHolder holder = (EntryHolder)attachable.getAttachment();
+        Attachable attachable = (Attachable) connection;
+        EntryHolder holder = (EntryHolder) attachable.getAttachment();
         if (holder == null)
             return false;
         boolean removed = pool.remove(holder.entry);
@@ -390,135 +352,91 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
             attachable.setAttachment(null);
         if (LOG.isDebugEnabled())
             LOG.debug("Removed ({}) {} {}", removed, holder.entry, pool);
-        if (removed || force)
-        {
+        if (removed || force) {
             released(connection);
             removed(connection);
         }
         return removed;
     }
 
-    protected void onCreated(Connection connection)
-    {
+    protected void onCreated(Connection connection) {
     }
 
-    protected boolean idle(Connection connection, boolean close)
-    {
+    protected boolean idle(Connection connection, boolean close) {
         return !close;
     }
 
-    protected void acquired(Connection connection)
-    {
+    protected void acquired(Connection connection) {
     }
 
-    protected void released(Connection connection)
-    {
+    protected void released(Connection connection) {
     }
 
-    protected void removed(Connection connection)
-    {
+    protected void removed(Connection connection) {
     }
 
-    Queue<Connection> getIdleConnections()
-    {
-        return pool.values().stream()
-            .filter(Pool.Entry::isIdle)
-            .filter(entry -> !entry.isClosed())
-            .map(Pool.Entry::getPooled)
-            .collect(toCollection(ArrayDeque::new));
+    Queue<Connection> getIdleConnections() {
+        return pool.values().stream().filter(Pool.Entry::isIdle).filter(entry -> !entry.isClosed()).map(Pool.Entry::getPooled).collect(toCollection(ArrayDeque::new));
     }
 
-    Collection<Connection> getActiveConnections()
-    {
-        return pool.values().stream()
-            .filter(entry -> !entry.isIdle())
-            .filter(entry -> !entry.isClosed())
-            .map(Pool.Entry::getPooled)
-            .collect(Collectors.toList());
+    Collection<Connection> getActiveConnections() {
+        return pool.values().stream().filter(entry -> !entry.isIdle()).filter(entry -> !entry.isClosed()).map(Pool.Entry::getPooled).collect(Collectors.toList());
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         pool.close();
     }
 
     @Override
-    public void dump(Appendable out, String indent) throws IOException
-    {
+    public void dump(Appendable out, String indent) throws IOException {
         Dumpable.dumpObjects(out, indent, this);
     }
 
     @Override
-    public boolean sweep()
-    {
-        pool.values().stream()
-            .map(Pool.Entry::getPooled)
-            .filter(connection -> connection instanceof Sweeper.Sweepable)
-            .forEach(connection ->
-            {
-                if (((Sweeper.Sweepable)connection).sweep())
-                {
-                    boolean removed = remove(connection);
-                    LOG.warn("Connection swept: {}{}{} from active connections{}{}",
-                        connection,
-                        System.lineSeparator(),
-                        removed ? "Removed" : "Not removed",
-                        System.lineSeparator(),
-                        dump());
-                }
-            });
+    public boolean sweep() {
+        pool.values().stream().map(Pool.Entry::getPooled).filter(connection -> connection instanceof Sweeper.Sweepable).forEach(connection -> {
+            if (((Sweeper.Sweepable) connection).sweep()) {
+                boolean removed = remove(connection);
+                LOG.warn("Connection swept: {}{}{} from active connections{}{}", connection, System.lineSeparator(), removed ? "Removed" : "Not removed", System.lineSeparator(), dump());
+            }
+        });
         return false;
     }
 
     @Override
-    public String toString()
-    {
-        return String.format("%s@%x[c=%d/%d/%d,a=%d,i=%d,q=%d]",
-            getClass().getSimpleName(),
-            hashCode(),
-            getPendingConnectionCount(),
-            getConnectionCount(),
-            getMaxConnectionCount(),
-            getActiveConnectionCount(),
-            getIdleConnectionCount(),
-            destination.getQueuedRequestCount());
+    public String toString() {
+        return String.format("%s@%x[c=%d/%d/%d,a=%d,i=%d,q=%d]", getClass().getSimpleName(), hashCode(), getPendingConnectionCount(), getConnectionCount(), getMaxConnectionCount(), getActiveConnectionCount(), getIdleConnectionCount(), destination.getQueuedRequestCount());
     }
 
-    private class FutureConnection extends Promise.Completable<Connection>
-    {
+    private class FutureConnection extends Promise.Completable<Connection> {
+
         private final Pool<Connection>.Entry reserved;
 
-        public FutureConnection(Pool<Connection>.Entry reserved)
-        {
+        public FutureConnection(Pool<Connection>.Entry reserved) {
             this.reserved = reserved;
         }
 
         @Override
-        public void succeeded(Connection connection)
-        {
+        public void succeeded(Connection connection) {
             if (LOG.isDebugEnabled())
                 LOG.debug("Connection creation succeeded {}: {}", reserved, connection);
-            if (connection instanceof Attachable)
-            {
-                ((Attachable)connection).setAttachment(new EntryHolder(reserved));
+            if (connection instanceof Attachable) {
+                ((Attachable) connection).setAttachment(new EntryHolder(reserved));
                 onCreated(connection);
                 pending.decrementAndGet();
                 reserved.enable(connection, false);
                 idle(connection, false);
                 complete(null);
                 proceed();
-            }
-            else
-            {
+            } else {
                 // reduce pending on failure and if not multiplexing also reduce demand
                 failed(new IllegalArgumentException("Invalid connection object: " + connection));
             }
         }
 
         @Override
-        public void failed(Throwable x)
-        {
+        public void failed(Throwable x) {
             if (LOG.isDebugEnabled())
                 LOG.debug("Connection creation failed {}", reserved, x);
             // reduce pending on failure and if not multiplexing also reduce demand
@@ -529,18 +447,17 @@ public abstract class AbstractConnectionPool extends ContainerLifeCycle implemen
         }
     }
 
-    private static class EntryHolder
-    {
+    private static class EntryHolder {
+
         private final Pool<Connection>.Entry entry;
+
         private final long creationTimestamp = System.nanoTime();
 
-        private EntryHolder(Pool<Connection>.Entry entry)
-        {
+        private EntryHolder(Pool<Connection>.Entry entry) {
             this.entry = Objects.requireNonNull(entry);
         }
 
-        private boolean isExpired(long timeoutNanos)
-        {
+        private boolean isExpired(long timeoutNanos) {
             return System.nanoTime() - creationTimestamp >= timeoutNanos;
         }
     }
