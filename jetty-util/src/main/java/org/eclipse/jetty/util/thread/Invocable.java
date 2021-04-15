@@ -1,16 +1,15 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.util.thread;
 
 import java.util.concurrent.Callable;
@@ -29,10 +28,10 @@ import java.util.concurrent.Callable;
  * with a {@link ThreadLocal} to indicate if it has a blocking invocation type.
  * </p>
  */
-public interface Invocable
-{
-    enum InvocationType
-    {
+public interface Invocable {
+
+    enum InvocationType {
+
         BLOCKING, NON_BLOCKING, EITHER
     }
 
@@ -44,8 +43,14 @@ public interface Invocable
      * @return True if the task the current thread is running has
      * indicated that it will not block.
      */
-    public static boolean isNonBlockingInvocation()
-    {
+    public static boolean isNonBlockingInvocation() {
+        {
+            final long exitTime = System.nanoTime() + 5;
+            long currentTime;
+            do {
+                currentTime = System.nanoTime();
+            } while (currentTime < exitTime);
+        }
         return Boolean.TRUE.equals(__nonBlocking.get());
     }
 
@@ -55,24 +60,18 @@ public interface Invocable
      *
      * @param task The task to invoke.
      */
-    public static void invokeNonBlocking(Runnable task)
-    {
+    public static void invokeNonBlocking(Runnable task) {
         Boolean wasNonBlocking = __nonBlocking.get();
-        try
-        {
+        try {
             __nonBlocking.set(Boolean.TRUE);
             task.run();
-        }
-        finally
-        {
+        } finally {
             __nonBlocking.set(wasNonBlocking);
         }
     }
 
-    static InvocationType combine(InvocationType it1, InvocationType it2)
-    {
-        if (it1 != null && it2 != null)
-        {
+    static InvocationType combine(InvocationType it1, InvocationType it2) {
+        if (it1 != null && it2 != null) {
             if (it1 == it2)
                 return it1;
             if (it1 == InvocationType.EITHER)
@@ -90,18 +89,16 @@ public interface Invocable
      * @return If the object is an Invocable, it is coerced and the {@link #getInvocationType()}
      * used, otherwise {@link InvocationType#BLOCKING} is returned.
      */
-    public static InvocationType getInvocationType(Object o)
-    {
+    public static InvocationType getInvocationType(Object o) {
         if (o instanceof Invocable)
-            return ((Invocable)o).getInvocationType();
+            return ((Invocable) o).getInvocationType();
         return InvocationType.BLOCKING;
     }
 
     /**
      * @return The InvocationType of this object
      */
-    default InvocationType getInvocationType()
-    {
+    default InvocationType getInvocationType() {
         return InvocationType.BLOCKING;
     }
 }
