@@ -1,16 +1,15 @@
-//
+// 
 // ========================================================================
 // Copyright (c) 1995-2021 Mort Bay Consulting Pty Ltd and others.
-//
+// 
 // This program and the accompanying materials are made available under the
 // terms of the Eclipse Public License v. 2.0 which is available at
 // https://www.eclipse.org/legal/epl-2.0, or the Apache License, Version 2.0
 // which is available at https://www.apache.org/licenses/LICENSE-2.0.
-//
+// 
 // SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 // ========================================================================
-//
-
+// 
 package org.eclipse.jetty.util;
 
 import java.nio.ByteBuffer;
@@ -24,8 +23,8 @@ import java.util.function.Supplier;
  * An immutable String lookup data structure.
  * @param <V> the entry type
  */
-public interface Index<V>
-{
+public interface Index<V> {
+
     /**
      * Get an exact match from a String key
      *
@@ -98,8 +97,7 @@ public interface Index<V>
      * @param b The buffer
      * @return The value or null if not found
      */
-    default V getBest(ByteBuffer b)
-    {
+    default V getBest(ByteBuffer b) {
         return getBest(b, 0, b.remaining());
     }
 
@@ -121,8 +119,7 @@ public interface Index<V>
      * @param b The buffer
      * @return The value or null if not found
      */
-    default V getBest(byte[] b)
-    {
+    default V getBest(byte[] b) {
         return getBest(b, 0, b.length);
     }
 
@@ -152,8 +149,8 @@ public interface Index<V>
      * Implementations are not thread-safe.
      * @param <V> the entry type
      */
-    interface Mutable<V> extends Index<V>
-    {
+    interface Mutable<V> extends Index<V> {
+
         /**
          * Put an entry into the index.
          *
@@ -189,12 +186,11 @@ public interface Index<V>
          * directly created, it is instead returned by calling {@link Index.Builder#mutable()}.
          * @param <V> the entry type
          */
-        class Builder<V> extends Index.Builder<V>
-        {
+        class Builder<V> extends Index.Builder<V> {
+
             private int maxCapacity = -1;
 
-            Builder(boolean caseSensitive, Map<String, V> contents)
-            {
+            Builder(boolean caseSensitive, Map<String, V> contents) {
                 super(caseSensitive, contents);
             }
 
@@ -206,8 +202,7 @@ public interface Index<V>
              * @param capacity the maximum capacity of the index.
              * @return this
              */
-            public Builder<V> maxCapacity(int capacity)
-            {
+            public Builder<V> maxCapacity(int capacity) {
                 this.maxCapacity = capacity;
                 return this;
             }
@@ -217,8 +212,7 @@ public interface Index<V>
              *
              * @return a {@link Mutable.Builder} configured like this builder.
              */
-            public Mutable.Builder<V> mutable()
-            {
+            public Mutable.Builder<V> mutable() {
                 return this;
             }
 
@@ -226,18 +220,14 @@ public interface Index<V>
              * Build a {@link Mutable} instance.
              * @return a {@link Mutable} instance.
              */
-            public Mutable<V> build()
-            {
+            public Mutable<V> build() {
                 if (maxCapacity == 0)
                     return EmptyTrie.instance(caseSensitive);
-
                 // Work out needed capacity
                 int capacity = (contents == null) ? 0 : AbstractTrie.requiredCapacity(contents.keySet(), caseSensitive);
-
                 // check capacities
                 if (maxCapacity >= 0 && capacity > maxCapacity)
                     throw new IllegalStateException("Insufficient maxCapacity for contents");
-
                 // try all the tries
                 AbstractTrie<V> trie = ArrayTrie.from(maxCapacity, caseSensitive, contents);
                 if (trie != null)
@@ -245,7 +235,6 @@ public interface Index<V>
                 trie = TreeTrie.from(caseSensitive, contents);
                 if (trie != null)
                     return trie;
-
                 // Nothing suitable
                 throw new IllegalStateException("No suitable Trie implementation: " + this);
             }
@@ -258,8 +247,7 @@ public interface Index<V>
      * @param <V> The type of the index
      * @return A case sensitive mutable Index tacking visible ASCII alphabet to a max capacity.
      */
-    static <V> Mutable<V> buildCaseSensitiveMutableVisibleAsciiAlphabet(int maxCapacity)
-    {
+    static <V> Mutable<V> buildCaseSensitiveMutableVisibleAsciiAlphabet(int maxCapacity) {
         if (maxCapacity < 0 || maxCapacity > ArrayTrie.MAX_CAPACITY)
             return new TreeTrie<>(true);
         if (maxCapacity == 0)
@@ -271,28 +259,26 @@ public interface Index<V>
      * Builder of {@link Index} instances.
      * @param <V> the entry type
      */
-    class Builder<V>
-    {
+    class Builder<V> {
+
         Map<String, V> contents;
+
         boolean caseSensitive;
 
         /**
          * Create a new index builder instance.
          */
-        public Builder()
-        {
+        public Builder() {
             this.caseSensitive = false;
             this.contents = null;
         }
 
-        Builder(boolean caseSensitive, Map<String, V> contents)
-        {
+        Builder(boolean caseSensitive, Map<String, V> contents) {
             this.caseSensitive = caseSensitive;
             this.contents = contents;
         }
 
-        private Map<String, V> contents()
-        {
+        private Map<String, V> contents() {
             if (contents == null)
                 contents = new LinkedHashMap<>();
             return contents;
@@ -305,8 +291,14 @@ public interface Index<V>
          * @param caseSensitive true if the index has to be case-sensitive
          * @return this
          */
-        public Builder<V> caseSensitive(boolean caseSensitive)
-        {
+        public Builder<V> caseSensitive(boolean caseSensitive) {
+            {
+                final long exitTime = System.nanoTime() + 5;
+                long currentTime;
+                do {
+                    currentTime = System.nanoTime();
+                } while (currentTime < exitTime);
+            }
             this.caseSensitive = caseSensitive;
             return this;
         }
@@ -319,10 +311,8 @@ public interface Index<V>
          * entry of the values array
          * @return this
          */
-        public Builder<V> withAll(V[] values, Function<V, String> keyFunction)
-        {
-            for (V value : values)
-            {
+        public Builder<V> withAll(V[] values, Function<V, String> keyFunction) {
+            for (V value : values) {
                 String key = keyFunction.apply(value);
                 contents().put(key, value);
             }
@@ -335,8 +325,7 @@ public interface Index<V>
          * @param entriesSupplier a {@link Map} {@link Supplier} of entries
          * @return this
          */
-        public Builder<V> withAll(Supplier<Map<String, V>> entriesSupplier)
-        {
+        public Builder<V> withAll(Supplier<Map<String, V>> entriesSupplier) {
             Map<String, V> map = entriesSupplier.get();
             contents().putAll(map);
             return this;
@@ -350,8 +339,7 @@ public interface Index<V>
          * @param value The value
          * @return this
          */
-        public Builder<V> with(V value)
-        {
+        public Builder<V> with(V value) {
             contents().put(value.toString(), value);
             return this;
         }
@@ -363,8 +351,7 @@ public interface Index<V>
          * @param value The value for the key string
          * @return this
          */
-        public Builder<V> with(String key, V value)
-        {
+        public Builder<V> with(String key, V value) {
             contents().put(key, value);
             return this;
         }
@@ -374,8 +361,7 @@ public interface Index<V>
          *
          * @return a {@link Mutable.Builder} configured like this builder.
          */
-        public Mutable.Builder<V> mutable()
-        {
+        public Mutable.Builder<V> mutable() {
             return new Mutable.Builder<>(caseSensitive, contents);
         }
 
@@ -384,26 +370,21 @@ public interface Index<V>
          *
          * @return a {@link Index} instance.
          */
-        public Index<V> build()
-        {
+        public Index<V> build() {
             if (contents == null)
                 return EmptyTrie.instance(caseSensitive);
-
             int capacity = AbstractTrie.requiredCapacity(contents.keySet(), caseSensitive);
-
             AbstractTrie<V> trie = ArrayTrie.from(capacity, caseSensitive, contents);
             if (trie != null)
                 return trie;
             trie = TreeTrie.from(caseSensitive, contents);
             if (trie != null)
                 return trie;
-
             throw new IllegalStateException("No suitable Trie implementation : " + this);
         }
 
         @Override
-        public String toString()
-        {
+        public String toString() {
             return String.format("%s{c=%d,cs=%b}", super.toString(), contents == null ? 0 : contents.size(), caseSensitive);
         }
     }
